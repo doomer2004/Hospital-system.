@@ -2,9 +2,7 @@
 
 namespace HospitalSystem.DAL;
 
-public class Patient : BaseEntity<Guid>
+public class Patient : User
 {
-    public string FullName { get; set; }
-    public string Email { get; set; }
     
 }
