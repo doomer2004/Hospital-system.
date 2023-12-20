@@ -1,18 +1,20 @@
 ﻿using AutoMapper;
+using HospitalSystem.BLL.Services.Appointment.Interfaces;
 using HospitalSystem.Common.Models.DTOs.Appointment;
 using HospitalSystem.Common.Models.DTOs.Doctor;
 using HospitalSystem.DAL.Entities;
 using HospitalSystem.DAL.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Protocols;
 
 namespace HospitalSystem.BLL.Services.Appointment;
 
-public class DoctorTimeSlotsService
+public class DoctorTimeSlotsService : IDoctorTimeSlotsService
 {
     private readonly IMapper _mapper;
-    private readonly IRepository<DoctorTimeSlots> _repository;
+    private readonly IRepository<DoctorTimeSlot> _repository;
 
-    public DoctorTimeSlotsService(IMapper mapper, IRepository<DoctorTimeSlots> repository)
+    public DoctorTimeSlotsService(IMapper mapper, IRepository<DoctorTimeSlot> repository)
     {
         _mapper = mapper;
         _repository = repository;
@@ -26,7 +28,7 @@ public class DoctorTimeSlotsService
         if (isTimeSlotAvailable)
             throw new ArgumentException("Time slot is not available");
 
-        var entity = _mapper.Map<DoctorTimeSlots>(doctorTimeSlots,
+        var entity = _mapper.Map<DoctorTimeSlot>(doctorTimeSlots,
             ops => ops.AfterMap((_, dest) =>
             {
                 dest.StartsAt = startsAt;
@@ -51,19 +53,18 @@ public class DoctorTimeSlotsService
         }
     }
 
-    public async Task<DoctorTimeSlots> GetAppointmentByPatientAsync(string patientEmail)
+    public async Task<DoctorTimeSlot> GetAppointmentByPatientAsync(Guid patientId)
     {
         var entity = await _repository
-            .Include(x => x.Patients)
-            .SingleOrDefaultAsync(x => x.Patients.Any(p => p.User.Email == patientEmail));
+            .SingleOrDefaultAsync(x => x.PatientId == patientId);
         return entity;
     }
 
-    public async Task<DoctorTimeSlots> GetAppointmentByDoctorAsync(DoctorDTO doctor)
+    public async Task<DoctorTimeSlot> GetAppointmentByDoctorAsync(DoctorDTO doctor)
     {
         var entity = await _repository
-            .Include(x => x.Doctors)
-            .SingleOrDefaultAsync(x => x.Doctors.Any(d => d.Email == doctor.Email));
+            .Include(x => x.Doctor)
+            .SingleOrDefaultAsync(x => x.Doctor.Email == doctor.Email);
         return entity;
     }
 
@@ -73,7 +74,7 @@ public class DoctorTimeSlotsService
         if (entity == null)
             throw new Exception("Appointment not found");
 
-        _mapper.Map<DoctorTimeSlots>(entity, ops => ops.AfterMap((_, dest) =>
+        _mapper.Map<DoctorTimeSlot>(entity, ops => ops.AfterMap((_, dest) =>
         {
             dest.StartsAt = startsAt;
             dest.EndsAt = endsAt;

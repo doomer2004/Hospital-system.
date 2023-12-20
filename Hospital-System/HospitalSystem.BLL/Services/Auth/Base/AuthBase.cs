@@ -17,7 +17,7 @@ public class AuthBase<T> where T : class
     private readonly JwtConfig _jwtConfig;
     protected readonly UserManager<User> _userManager;
 
-    protected AuthBase(JwtConfig jwtConfig, UserManager<User> userManager, IValidator<T> validator)
+    protected AuthBase(JwtConfig jwtConfig, UserManager<User> userManager)
     {
         _jwtConfig = jwtConfig;
         _userManager = userManager;
@@ -52,7 +52,7 @@ public class AuthBase<T> where T : class
                 new Claim("id", user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email!),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.Role, await _userManager.GetRoleAsync(user))
+                new Claim(ClaimTypes.Role, await _userManager.GetRoleAsync(user)),
             }),
             Expires = DateTime.UtcNow.Add(_jwtConfig.RefreshTokenLifetime),
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
@@ -73,7 +73,7 @@ public class AuthBase<T> where T : class
         return Convert.ToBase64String(randomNumber);
     }
 
-    private async Task<string> GenerateRefreshTokenAsync(User user)
+    public async Task<string> GenerateRefreshTokenAsync(User user)
     {
         user.RefreshToken = GenerateRefreshToken(user);
         user.RefreshTokenExpiresAt = DateTimeOffset.UtcNow.Add(_jwtConfig.RefreshTokenLifetime);

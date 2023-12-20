@@ -1,27 +1,34 @@
 ﻿using AutoMapper;
+using HospitalSystem.BLL.Services.Doctor.Interfaces;
+using HospitalSystem.Common.Enum;
 using HospitalSystem.Common.Models.DTOs.Doctor;
+using HospitalSystem.DAL;
 using HospitalSystem.DAL.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace HospitalSystem.BLL.Services.Doctor;
 
-public class DoctorsService
+public class DoctorsService : IDoctorsService
 {
-    private readonly IRepository<DAL.Doctor> _repository;
+    private readonly IRepository<DAL.Entities.Doctor> _repository;
+    private readonly IRepository<Specialty> _specialtyRepository;
     private readonly IMapper _mapper;
 
-    public DoctorsService(IMapper mapper, IRepository<DAL.Doctor> repository)
+    public DoctorsService(IMapper mapper, IRepository<DAL.Entities.Doctor> repository, IRepository<Specialty> specialtyRepository)
     {
         _repository = repository;
+        _specialtyRepository = specialtyRepository;
         _mapper = mapper;
     }
 
-    public async Task<bool> CreateDoctorsAsync(DoctorDTO doctor)
+    public async Task<bool> CreateDoctorsAsync(CreateDoctorDTO doctor)
     {
         try
         {
-            var entity = _mapper.Map<DAL.Doctor>(doctor);
+            var entity = _mapper.Map<DAL.Entities.Doctor>(doctor);
+            entity.Specialties = _specialtyRepository.Where(x => doctor.SpecialtyIds.Contains(x.Id)).ToList();
             await _repository.InsertAsync(entity);
+            
             return true;
         }
         catch (Exception e)
@@ -44,14 +51,14 @@ public class DoctorsService
         }
     }
 
-    public async Task<DAL.Doctor> GetDoctorsByIdAsync(Guid id)
+    public async Task<DAL.Entities.Doctor> GetDoctorsByIdAsync(Guid id)
     {
             var entity = await _repository.SingleOrDefaultAsync(x => x.Id == id);
             await _repository.UpdateAsync(entity);
             return entity;
     }
 
-    public async Task<List<DAL.Doctor>> GetDoctorsBySpecialtyAsync(SpecialtyDTO specialty)
+    public async Task<List<DAL.Entities.Doctor>> GetDoctorsBySpecialtyAsync(SpecialtyDTO specialty)
     {
         var entity = await _repository
             .Include(x => x.Specialties)
@@ -65,7 +72,7 @@ public class DoctorsService
         var entity = await _repository.SingleOrDefaultAsync(x => x.FullName == doctor.FullName);
         if (entity == null)
             throw new ArgumentException("Doctor not found");
-        _mapper.Map<DAL.Doctor>(doctor);
+        _mapper.Map<DAL.Entities.Doctor>(doctor);
         await _repository.UpdateAsync(entity);
         return true;
     }

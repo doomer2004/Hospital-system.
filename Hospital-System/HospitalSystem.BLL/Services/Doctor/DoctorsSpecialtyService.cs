@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using HospitalSystem.BLL.Services.Appointment.Interfaces;
+using HospitalSystem.BLL.Services.Doctor.Interfaces;
 using HospitalSystem.Common.Models.DTOs.Doctor;
 using HospitalSystem.DAL;
 using HospitalSystem.DAL.Entities;
@@ -7,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HospitalSystem.BLL.Services.Doctor;
 
-public class DoctorsSpecialtyService
+public class DoctorsSpecialtyService : IDoctorsSpecialtyService
 {
     private readonly IRepository<Specialty> _repository;
     private readonly IMapper _mapper;
@@ -42,23 +44,23 @@ public class DoctorsSpecialtyService
         return true;
     }
 
-    public async Task<bool> GetDoctorsSpecialtyByIdAsync(Guid id)
+    public async Task<Specialty> GetDoctorsSpecialtyByIdAsync(Guid id)
     {
         var entity = await _repository.SingleOrDefaultAsync(x => x.Id == id);
         
         if (entity == null)
             throw new ArgumentException("Specialty not found");
         
-        return true;
+        return entity;
     }
     
-    public async Task<bool> GetDoctorsSpecialtyByDoctorAsync(DoctorDTO doctor)
+    public async Task<List<Specialty>> GetDoctorsSpecialtyByDoctorAsync(DoctorDTO doctor)
     {
         var entity = await _repository
             .Include(x => x.Doctors)
             .Where(x => x.Doctors.Any(d => d.Email == doctor.Email))
             .ToListAsync();
-        return true;
+        return entity;
     }
 
     public async Task<bool> UpdateDoctorsSpecialtyAsync(SpecialtyDTO specialty)
