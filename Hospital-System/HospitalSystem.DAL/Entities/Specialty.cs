@@ -1,4 +1,5 @@
-﻿using HospitalSystem.DAL.Entities.Base;
+﻿using HospitalSystem.DAL.Entities;
+using HospitalSystem.DAL.Entities.Base;
 
 namespace HospitalSystem.DAL;
 

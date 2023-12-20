@@ -10,6 +10,7 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
         var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
         optionsBuilder.UseSqlServer(
             "Server=localhost;Database=Hospital;Trusted_Connection=True;TrustServerCertificate=True");
+        
         return new ApplicationDbContext(optionsBuilder.Options);
     }
 }

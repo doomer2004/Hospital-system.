@@ -11,6 +11,5 @@ public class Patient : BaseEntity<Guid>
     
     [ForeignKey(nameof(UserId))]
     public User User { get; set; }
-
-    public List<DoctorTimeSlots> DoctorTimeSlots { get; set; }
+    
 }

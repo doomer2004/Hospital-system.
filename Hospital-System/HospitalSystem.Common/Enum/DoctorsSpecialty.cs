@@ -8,5 +8,4 @@ public enum DoctorsSpecialty
     Gastroenterologist,
     Oncologist,
     Ophthalmologist,
-    
 }
