@@ -1,10 +1,15 @@
-﻿using HospitalSystem.DAL.Entities.Base;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using HospitalSystem.DAL.Entities;
+using HospitalSystem.DAL.Entities.Base;
+using Microsoft.AspNetCore.Identity;
 
 namespace HospitalSystem.DAL;
 
 public class Patient : BaseEntity<Guid>
 {
-    public string FullName { get; set; }
-    public string Email { get; set; }
+    public Guid UserId { get; set; }
+    
+    [ForeignKey(nameof(UserId))]
+    public User User { get; set; }
     
 }
